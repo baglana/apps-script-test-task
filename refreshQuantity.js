@@ -92,11 +92,13 @@ function refreshQuantity(){
     const stockSheet = ss.getSheetByName('Ассортимент');
     const stockRange = stockSheet.getDataRange();
     const stockValues = stockRange.getValues();
+    const stockFormulas = stockRange.getFormulas();
 
     const ID_COLUMN = 0;
     const QUANTITY_COLUMN = 3;
 
     for (let row = 1; row < stockValues.length; row++) {
+
       const itemId = stockValues[row][ID_COLUMN];
 
       let availableItem;
@@ -109,7 +111,17 @@ function refreshQuantity(){
         if (availableItem) {
           stockValues[row][QUANTITY_COLUMN] = availableItem.quantity;
         }
+      } else {
+        stockValues[row][QUANTITY_COLUMN] = '';
       }
+      
+      // fill sheet row values with formulas if there were any
+      for (let col = 0; col < stockFormulas[0].length; col++) {
+        if (stockFormulas[row][col]) {
+          stockValues[row][col] = stockFormulas[row][col];
+        }
+      }
+
     }
 
     stockRange.setValues(stockValues);
