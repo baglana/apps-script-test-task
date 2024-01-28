@@ -37,11 +37,14 @@ function getAvailableMethods(){
 function getAccessToken() {
   const requestOptions = getRequestOptions_('getAccessToken')
   const response = UrlFetchApp.fetch(WEBAPP_URL, requestOptions)
-  const json = JSON.parse(response);
-  
+
+  const json = JSON.parse(response.getContentText());
+
   if (json?.status !== 'ok') {
-    throw Error('error getting access token');
+    throw Error(json.error);
+    // throw Error('error getting access token');
   }
+
   
   return json?.access_token;
 }
@@ -49,11 +52,14 @@ function getAccessToken() {
 function getAvailableItems() {
   const requestOptions = getRequestOptions_('getAvailableItems', getAccessToken())
   const response = UrlFetchApp.fetch(WEBAPP_URL, requestOptions)
-  const json = JSON.parse(response);
   
+  const json = JSON.parse(response.getContentText());
+
   if (json?.status !== 'ok') {
-    throw Error('error getting available items');
+    throw Error(json.error);
+    // throw Error('error getting available items');
   }
+
 
   return json.items;
 }
