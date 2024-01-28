@@ -38,30 +38,30 @@ function getAccessToken() {
   const requestOptions = getRequestOptions_('getAccessToken')
   const response = UrlFetchApp.fetch(WEBAPP_URL, requestOptions)
 
-  const json = JSON.parse(response.getContentText());
+  const data = JSON.parse(response.getContentText());
 
-  if (json?.status !== 'ok') {
-    throw Error(json.error);
+  if (data?.status !== 'ok') {
+    throw Error(data.error);
     // throw Error('error getting access token');
   }
 
   
-  return json?.access_token;
+  return data?.access_token;
 }
 
 function getAvailableItems() {
   const requestOptions = getRequestOptions_('getAvailableItems', getAccessToken())
   const response = UrlFetchApp.fetch(WEBAPP_URL, requestOptions)
   
-  const json = JSON.parse(response.getContentText());
+  const data = JSON.parse(response.getContentText());
 
-  if (json?.status !== 'ok') {
-    throw Error(json.error);
+  if (data?.status !== 'ok') {
+    throw Error(data.error);
     // throw Error('error getting available items');
   }
 
 
-  return json.items;
+  return data.items;
 }
 
 
@@ -78,27 +78,35 @@ function refreshQuantity(){
   // ss.toast('Произошла ошибка!')
 
   const availableItems = getAvailableItems();
+  if (!availableItems || !availableItems.length) {
+    return;
+  }
 
-  const sh = ss.getSheetByName('Ассортимент');
+  const stockSheet = ss.getSheetByName('Ассортимент');
+  const stockRange = ss.getDataRange();
+  const stockValues = stockRange.getValues();
 
-  console.log(sh.getDataRange().getValues());
-  
-  const idRange = sh.getRange('A2:A');
-  const targetRange = sh.getRange('D2:D');
-  const targetValues = targetRange.getValues();
+  const ID_COLUMN = 0;
+  const QUANTITY_COLUMN = 3;
 
-  idRange.getValues().forEach( (row, i) => {
-    console.log('row', i)
-    const ind = availableItems.findIndex((e) => {
-      return e.id === row[0];
-    });
-    if (ind !== -1) {
-      targetValues[i][0] = availableItems[ind].quantity;
+  for (let row = 1; row < stockValues.length; row++) {
+    const itemId = stockValues[row][ID_COLUMN];
+
+    let availableItemInd;
+
+    if (itemId !== '') {
+      availableItemInd = availableItems.findIndex((e) => {
+        return e.id === itemId;
+      });
+
+      if (availableItemInd !== -1) {
+        stockValues[row][QUANTITY_COLUMN] = availableItems[availableItemInd].quantity;
+      }
     }
-  });
+  }
 
-  targetRange.setValues(targetValues);
-
+  stockRange.setValues(stockValues);
+  
   ss.toast('Обновление завершено!')
 }
 
