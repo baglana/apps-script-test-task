@@ -92,15 +92,15 @@ function refreshQuantity(){
   for (let row = 1; row < stockValues.length; row++) {
     const itemId = stockValues[row][ID_COLUMN];
 
-    let availableItemInd;
+    let availableItem;
 
     if (itemId !== '') {
-      availableItemInd = availableItems.findIndex((e) => {
+      availableItem = availableItems.find((e) => {
         return e.id === itemId;
       });
 
-      if (availableItemInd !== -1) {
-        stockValues[row][QUANTITY_COLUMN] = availableItems[availableItemInd].quantity;
+      if (availableItem) {
+        stockValues[row][QUANTITY_COLUMN] = availableItem.quantity;
       }
     }
   }
